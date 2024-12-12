@@ -1,5 +1,6 @@
 # Gene-s_eye_view_of_quantitative_genetics
 
-The file propagation simulates a population from individual-based models, with selection, drift, mutation and strong recombination. It contains a function Simulate which returns the vector of allele frequencies at each locus.
+The file bifurcation.py is self-contained. Using function Figurebif() will yield Figure 1 (with the pitchfork bifurcation).
 
-The file bifurcation solves numerically the stationary distribution parameters for stabilising/disrupting selection. In particular the function plot_bifurcations will plot the mean trait value at equilibrium as a function of s.
+The file plot_propagation_chaos contains the function Figure_propchaos() which will plot Figure 2. It relies on two other files.
+The file PDE_evolution contains the function simulate_PDE which approximates with an Euler method. The file Simulate contains the function Simulate() which generates the population.
