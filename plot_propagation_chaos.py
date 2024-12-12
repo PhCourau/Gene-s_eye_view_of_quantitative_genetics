@@ -1,19 +1,17 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from simulate_population import Simulate
+from propagation import Simulate
 from PDE_evolution import simulate_PDE,gen_mu0
 #This file contains the function plot_propagation_chaos which will plot allele frequency dynamics
-
+#The parameters of the simulation are to be found in the propagation.py file
 
 N=1000 #Population size
 L=100 #Number of loci
+theta = (1.1,3.3) #mutation rates (forward, backwards)
+omega = 15 #strength of selection
+T=.3
 
-theta = (3.3,1.1) #mutation rates (forward, backwards)
-s = 10 #strength of selection
-
-T = 1 #duration of a simulation run
-
-def plot_propagation_chaos(list_allele_frequencies,parameters=None,Ny=100):
+def plot_propagation_chaos(list_allele_frequencies,Ny=100):
 	"""Plots the result of Simulate.
 	Parameters
 	----------
@@ -27,27 +25,25 @@ def plot_propagation_chaos(list_allele_frequencies,parameters=None,Ny=100):
 	T: optional. Used in the label of the x axis
 	Ny: the discretization step in space for the PDE theoretical approximation
 	"""
-	if parameters is None:
-		T=1
-		L=L
-	else:
-		theta,s,N,L,T = parameters
-		ytheory = simulate_PDE(gen_mu0(theta,Ny),
-					theta,s,T)
-		xtheory = np.linspace(0,T,len(ytheory))
+	ytheory = simulate_PDE( gen_mu0(theta,Ny),
+					theta,omega,T)
+	xtheory = np.linspace(0,T*N,len(ytheory))
 
 	fig=plt.figure()
 	ax=plt.axes()
-	x = np.linspace(0,T,np.shape(list_allele_frequencies)[0])
+	x = np.linspace(0,N*T,np.shape(list_allele_frequencies)[0])
 
-	for l in range(L):
+	for l in range(1,L):
 		ax.plot(x,list_allele_frequencies[:,l],alpha=.1,color="grey")
 	ax.plot(x,
 		np.mean(list_allele_frequencies,axis=1),
 		color="green")
-	if parameters is not None:
-		ax.plot(xtheory,ytheory,"orange")
+	ax.plot(xtheory,ytheory,"orange")
 	ax.set_ylim((0,1))
-	ax.set_xlabel("t")
+	ax.set_xlabel("Generations")
 	ax.set_ylabel("Frequency of the +1 allele")
 	plt.show()
+
+def Figure_propchaos():
+	list_allele_frequencies = Simulate(T,theta,omega,L,N)
+	plot_propagation_chaos(list_allele_frequencies)

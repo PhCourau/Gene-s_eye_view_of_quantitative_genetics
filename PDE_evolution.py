@@ -28,10 +28,10 @@ def gen_mu0(theta,N):
 	pi= x**(2*theta[0]-1) * (1-x)**(2*theta[1]-1)
 	return pi/np.sum(pi)
 
-def FP_WF(mu,theta,s,dt):
+def FP_WF(mu,theta,omega,dt):
 	x = np.linspace(0,1,len(mu))
 	dy = 1/len(mu)
-	selection = -2*s*(2*np.sum(x*mu)-1)
+	selection = -2*omega*(2*np.sum(x*mu)-1)
 	func_to_derive = mu*(theta[0]*(1-x) - theta[1]*x + x*(1-x)*selection)
 
 	Derivative = (func_to_derive[1:-1]-func_to_derive[:-2])/dy
@@ -44,7 +44,7 @@ def FP_WF(mu,theta,s,dt):
 		#print("pb") #raise Warning("Runtime warning: numerical instabilities have appeared. Try a smaller value for dt")
 	return mu/np.sum(mu)
 
-def simulate_PDE(mu0,theta,s,T,dt=None):
+def simulate_PDE(mu0,theta,omega,T,dt=None):
 	"""Simulates the solution to the PDE and returns a vector for the evolution of the mean
 	Parameters:
 	-----------
@@ -59,10 +59,10 @@ def simulate_PDE(mu0,theta,s,T,dt=None):
 		dt=1/(N**2)
 	list_means = [0]*int(T/dt)
 	for t in range(int(T/dt)):
-		mu0 = FP_WF(mu0,theta,s,dt)
+		mu0 = FP_WF(mu0,theta,omega,dt)
 		list_means[t] = np.sum(x*mu0)
 		if t%(int(T/dt/100)) == 0:
-			print("Done step " + str(t) + " of "+str(T/dt))
+			print("Euler approximation: step " + str(t) + " of "+str(T/dt))
 	return list_means
 
 
