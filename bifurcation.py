@@ -116,6 +116,7 @@ def gss(f, a, b, tolerance=1e-5):
 	>>> print(f"{x:.5f}")
 	2.00000
 
+	credit to Wikipedia
 	"""
 	invphi
 	while b - a > tolerance:
