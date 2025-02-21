@@ -118,7 +118,7 @@ def gss(f, a, b, tolerance=1e-5):
 
 	credit to Wikipedia
 	"""
-	invphi
+	invphi = (math.sqrt(5) - 1) / 2  # 1 / phi (inverse golden ratio)
 	while b - a > tolerance:
 		c = b - (b - a) * invphi
 		d = a + (b - a) * invphi
