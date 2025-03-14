@@ -4,15 +4,15 @@ from simulate_population import Population
 from simulate_population import generate_pop
 import scipy.special as special
 
-#This file contains the function plot_Figurebif which draws the bifurcation diagram for 
+#This file contains the function plot_Figurebif which draws the bifurcation diagram for
 #stabilising/disruptive selection.
 
 
 N = 200 #Population size
 L = 100
-theta = (.6,.6) #(.7,.6) #mutation rates (forward, backwards) (.6,.9)
-srange = (-5,0,40) #range of simulated s values
-srangeanalytic = (-5,0,1000) #range of computed s values
+theta = (.6,.6) #mutation rates (forward, backwards)
+kapparange = (-5,0,40) #range of simulated kappa values
+kapparangeanalytic = (-5,0,1000) #range of computed s values
 T= 10
 
 invphi = (np.sqrt(5)-1)/2
@@ -35,71 +35,33 @@ def match_equation(Z,s,theta):
 #Here we simulate values of equilibria by letting the system evolve for a time T at each value of s.
 #N=10000
 
-def simulate_equilibria(srange = srange,theta=theta,T=T,N=N,L=L):
-	"""This function computes for each s in srange the +1 allele frequency after time T twice:
+def simulate_equilibria(kapparange = kapparange,theta=theta,T=T,N=N,L=L):
+	"""This function computes for each s in kapparange the +1 allele frequency after time T twice:
 	once if we start from all +1, the other if we start from all -1"""
-	equilibria =[0]*2*srange[-1]
-	for (sindex,s) in enumerate(np.linspace(*srange)):
+	equilibria =[0]*2*kapparange[-1]
+	for (kappaindex,kappa) in enumerate(np.linspace(*kapparange)):
 		pop=Population(theta,
 				N,
 				L,
 				population= np.array([[False]*L]*N,dtype='bool'),
 				alpha = np.ones(L))
 		for t in range(int(N*T)):
-			pop.selection_drift_sex(s,0,N,L)
+			pop.selection_drift_sex(kappa,0,N,L)
 			pop.mutation(theta,N,L)
-		equilibria[2*sindex] = 2*np.mean(pop.population)-1
+		equilibria[2*kappaindex] = 2*np.mean(pop.population)-1
 		pop=Population(theta,
 				N,
 				L,
 				population=np.array([[True]*L]*N,dtype='bool'),
 				alpha = np.ones(L))
 		for t in range(int(N*T)):
-			pop.selection_drift_sex(s,0,N,L)
+			pop.selection_drift_sex(kappa,0,N,L)
 			pop.mutation(theta,N,L)
-		equilibria[2*sindex+1] = 2*np.mean(pop.population)-1
-		print("Done s="+str(s))
+		equilibria[2*kappaindex+1] = 2*np.mean(pop.population)-1
+		print("Done kappa="+str(kappa))
 	return np.array(equilibria)
 
 
-
-
-def plot_Figurebifcolor(srange=srange,theta=theta,T=T,N=N,L=L,equilibria=None):
-	"""Plots our desired figure.
-	Parameters:
-	-----------
-	srange: a triplet (smin,smax,nbstep) to be fed into np.linspace to get all tested values of s.
-
-	theta: a tuple of positive floats for the mutation rates (forward, backward).
-
-	T: how long to simulate a population before we consider that it is at equilibrium
-
-	equilibria: if None, empirical equilibria are simulated using the function simulate_equilibria
-		    Otherwise, imput a list of 2*nbsteps arrays, for instance [simulate_equilibria()]
-
-	"""
-	if equilibria is None:
-		equilibria = [simulate_equilibria(srange = srange,theta=theta,T=T,N=N,L=L)]
-	fig = plt.figure()
-	ax=plt.axes()
-	for eq in equilibria:
-		ax.plot(np.repeat(np.linspace(*srange),2),eq,"or")
-
-	list_s = np.linspace(*srangeanalytic)
-	list_Z = np.linspace(-1,1,2*N)
-	data = np.zeros((2*N,srangeanalytic[-1]))
-	for (inds,s) in enumerate(list_s):
-		for (indZ,Z) in enumerate(list_Z):
-			data[indZ,inds] = -np.log(match_equation(Z,s,theta))
-
-	CS = ax.contourf(list_s,list_Z,data,levels=100)
-	fig.colorbar(CS)
-
-	ax.set_xlabel("κ")
-	ax.set_ylabel("s")
-	ax.set_title(
-"Equilibrium value of the mean phenotype for stabilising/disruptive selection")
-	plt.show()
 
 
 # Here we find the equilibria with a golden search algorithm and plot simulations versus analytic predictions
@@ -129,13 +91,13 @@ def gss(f, a, b, tolerance=1e-5):
 	return (b + a) / 2
 
 
-def plot_Figurebif(srange=srange,srangeanalytic=srangeanalytic,theta=.6,T=T,N=N,L=L):
+def plot_Figurebif(kapparange=kapparange,kapparangeanalytic=kapparangeanalytic,theta=.6,T=T,N=N,L=L):
 	"""Plots our desired figure.
 	Parameters:
 	-----------
-	srange: a triplet (smin,smax,nbstep) to be fed into np.linspace to get all tested values of s.
+	kapparange: a triplet (smin,smax,nbstep) to be fed into np.linspace to get all tested values of s.
 
-	srangeanalytic: a triplet to get all values of s for analytical predictions
+	kapparangeanalytic: a triplet to get all values of s for analytical predictions
 
 	theta: a single positive float (symmetric mutation rate)
 
@@ -145,29 +107,28 @@ def plot_Figurebif(srange=srange,srangeanalytic=srangeanalytic,theta=.6,T=T,N=N,
 		    Otherwise, imput a list of 2*nbsteps arrays, for instance [simulate_equilibria()]
 
 	"""
-	equilibria = [simulate_equilibria(srange = srange,theta=(theta,theta),T=T,N=N,L=L)]
+	equilibria = [simulate_equilibria(kapparange = kapparange,theta=(theta,theta),T=T,N=N,L=L)]
 	fig = plt.figure()
 	ax=plt.axes()
 	for eq in equilibria:
-		ax.plot(np.repeat(np.linspace(*srange),2),eq,"or")
+		ax.plot(np.repeat(np.linspace(*kapparange),2),eq,"or")
 
 	#Plot central branch
 	kappa_c = (4*theta+1)/2
-	ax.plot([kappa_c,srange[1]],[0,0],"blue")
-	ax.plot([kappa_c,srange[0]],[0,0],"blue",linestyle="--")
+	ax.plot([-kappa_c,kapparange[0]],[0,0],"blue",linestyle="--")
 
-	list_s = np.linspace(*srangeanalytic)
+	list_kappa = np.linspace(*kapparangeanalytic)
 	#Top branch
-	topbranch = np.zeros(srangeanalytic[2])
-	for (k,s) in enumerate(list_s):
+	topbranch = np.zeros(kapparangeanalytic[2])
+	for (k,s) in enumerate(list_kappa):
 		topbranch[k] = gss(lambda z: match_equation(z,s,(theta,theta)),0,1)
-	ax.plot(list_s,topbranch,"blue")
+	ax.plot(list_kappa,topbranch,"blue")
 
 	#Bottom branch
-	bottombranch = np.zeros(srangeanalytic[2])
-	for (k,s) in enumerate(list_s):
+	bottombranch = np.zeros(kapparangeanalytic[2])
+	for (k,s) in enumerate(list_kappa):
 		bottombranch[k] = gss(lambda z: match_equation(z,s,(theta,theta)),-1,0)
-	ax.plot(list_s,bottombranch,"blue")
+	ax.plot(list_kappa,bottombranch,"blue")
 
 
 	ax.set_xlabel("$\kappa$")
@@ -185,10 +146,10 @@ def ismatched_equation(Z,s,theta,epsilon):
 	return False
 
 def find_solutions(theta,epsilon=1e-3):
-	list_s = np.linspace(-15,1,200)
+	list_kappa = np.linspace(-15,1,200)
 	list_Z = np.linspace(-1,1,1001)
 	list_points = []
-	for s in list_s:
+	for s in list_kappa:
 		for Z in list_Z:
 			if ismatched_equation(Z,s,theta,epsilon):
 				list_points.append([s,Z])
@@ -197,14 +158,14 @@ def find_solutions(theta,epsilon=1e-3):
 
 def plot_bifurcations(  list_theta = (.6,.6),
 			N=N,
-			srange=srange,
+			kapparange=kapparange,
 			nbsteps=1000):
 	"""Plots a bifurcation diagram showing the fixed points (s,Z) for different values of theta
 	Parameters:
 	-----------
 	"""
 	ax = plt.axes()
-	points = find_solutions(theta,N=N,srange=srange,nbsteps=nbsteps)
+	points = find_solutions(theta,N=N,kapparange=kapparange,nbsteps=nbsteps)
 	ax.plot(points[0],
 		points[1],
 		"o",
