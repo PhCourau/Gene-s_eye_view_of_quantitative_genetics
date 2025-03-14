@@ -26,7 +26,7 @@ def mean_phenotype(theta,s):
 		-1)
 
 
-def match_equation(Z,s,theta,nbsteps=1000):
+def match_equation(Z,s,theta):
 	"""Checks the distance between Z and the mean of pi_Z (see Theorem 5.1 of our paper)"""
 	return np.abs(mean_phenotype(theta,-2*Z*s)- Z)
 
@@ -95,7 +95,7 @@ def plot_Figurebifcolor(srange=srange,theta=theta,T=T,N=N,L=L,equilibria=None):
 	CS = ax.contourf(list_s,list_Z,data,levels=100)
 	fig.colorbar(CS)
 
-	ax.set_xlabel("ω")
+	ax.set_xlabel("κ")
 	ax.set_ylabel("s")
 	ax.set_title(
 "Equilibrium value of the mean phenotype for stabilising/disruptive selection")
@@ -116,7 +116,7 @@ def gss(f, a, b, tolerance=1e-5):
 	>>> print(f"{x:.5f}")
 	2.00000
 
-	credit to Wikipedia
+	Credit to Wikipedia
 	"""
 	invphi = (np.sqrt(5) - 1) / 2  # 1 / phi (inverse golden ratio)
 	while b - a > tolerance:
@@ -152,7 +152,9 @@ def plot_Figurebif(srange=srange,srangeanalytic=srangeanalytic,theta=.6,T=T,N=N,
 		ax.plot(np.repeat(np.linspace(*srange),2),eq,"or")
 
 	#Plot central branch
-	ax.plot([srange[0],srange[1]],[0,0],"blue")
+	kappa_c = (4*theta+1)/2
+	ax.plot([kappa_c,srange[1]],[0,0],"blue")
+	ax.plot([kappa_c,srange[0]],[0,0],"blue",linestyle="--")
 
 	list_s = np.linspace(*srangeanalytic)
 	#Top branch
@@ -168,8 +170,8 @@ def plot_Figurebif(srange=srange,srangeanalytic=srangeanalytic,theta=.6,T=T,N=N,
 	ax.plot(list_s,bottombranch,"blue")
 
 
-	ax.set_xlabel("ω")
-	ax.set_ylabel("s")
+	ax.set_xlabel("$\kappa$")
+	ax.set_ylabel("$\mathbb{E}[2f_t-1]$")
 	plt.show()
 
 
